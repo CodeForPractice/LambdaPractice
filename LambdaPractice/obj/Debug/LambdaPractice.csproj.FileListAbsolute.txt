@@ -1,8 +1,0 @@
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\bin\Debug\LambdaPractice.exe.config
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\bin\Debug\LambdaPractice.exe
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\bin\Debug\LambdaPractice.pdb
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\obj\Debug\LambdaPractice.csprojResolveAssemblyReference.cache
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\obj\Debug\LambdaPractice.exe
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\obj\Debug\LambdaPractice.pdb
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\bin\Debug\JQ.LambdaResolve.dll
-F:\Code\CodeForPractice\LambdaPractice\LambdaPractice\bin\Debug\JQ.LambdaResolve.pdb

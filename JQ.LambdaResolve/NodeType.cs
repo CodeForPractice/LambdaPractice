@@ -31,6 +31,11 @@
         Call = 5,
 
         /// <summary>
+        /// 一维数组
+        /// </summary>
+        NewArrayInit = 6,
+
+        /// <summary>
         /// 未知类型
         /// </summary>
         Unknown = -99,

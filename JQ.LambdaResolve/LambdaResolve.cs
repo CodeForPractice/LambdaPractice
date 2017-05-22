@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace JQ.LambdaResolve
 {
@@ -36,6 +34,7 @@ namespace JQ.LambdaResolve
             result += ")";
             return result;
         }
+
         /// <summary>
         /// 判断常量表达式
         /// </summary>
@@ -56,9 +55,11 @@ namespace JQ.LambdaResolve
                     case "true":
                         expressionResult = " 1=1 ";
                         break;
+
                     case "false":
                         expressionResult = " 1=0 ";
                         break;
+
                     default:
                         expressionResult = value.ToString();
                         break;
@@ -76,13 +77,37 @@ namespace JQ.LambdaResolve
         {
             if (funcExp.Method.Name.Contains("Contains"))
             {
-                throw new Exception($"不支持{funcExp.Method.Name}方法");
+                Expression leftExpression = null;
+                Expression rightExpression = null;
+                bool funcExpObjectIsnull = funcExp.Object == null;
+                if (funcExpObjectIsnull)
+                {
+                    leftExpression = funcExp.Arguments[0];
+                    rightExpression = funcExp.Arguments[1];
+                }
+                else
+                {
+                    leftExpression = funcExp.Object;
+                    rightExpression = funcExp.Arguments[0];
+                }
+
+                var resultLeft = GetSqlInfo(GetNodeType(leftExpression),leftExpression);
+                //判断左边是不是字段
+                var resultRight = GetSqlInfo(GetNodeType(rightExpression), rightExpression);
+                if (funcExpObjectIsnull)
+                {
+                    return $"{resultRight} IN {resultLeft}";
+                }else
+                {
+                    return $"{resultLeft} {resultRight}";
+                }
             }
             else
             {
                 throw new Exception($"不支持{funcExp.Method.Name}方法");
             }
         }
+
         /// <summary>
         /// 判断包含变量的表达式
         /// </summary>
@@ -92,7 +117,25 @@ namespace JQ.LambdaResolve
         {
             return funcExp.Member.Name;
         }
-
+        /// <summary>
+        /// 判断包含数组的表达式
+        /// </summary>
+        /// <param name="funcexp"></param>
+        /// <returns></returns>
+        private string VisitNewArrayExpression(NewArrayExpression funcexp)
+        {
+            List<string> builder = new List<string>();
+            foreach (var item in funcexp.Expressions)
+            {
+                builder.Add(GetSqlInfo(GetNodeType(item), item));
+            }
+            return $"({string.Join(",", builder)})";
+        }
+        /// <summary>
+        /// 判断包含一元运算符的表达式
+        /// </summary>
+        /// <param name="funcExp"></param>
+        /// <returns></returns>
         private string VisitUnaryExpression(UnaryExpression funcExp)
         {
             var result = ExpressionTypeToOperate(funcExp.NodeType);
@@ -113,15 +156,23 @@ namespace JQ.LambdaResolve
                 case NodeType.Constant:
                     sqlInfo = VisitConstantExpression(funcExp as ConstantExpression);
                     break;
+
                 case NodeType.Call:
                     sqlInfo = VisitMethodCallExpression(funcExp as MethodCallExpression);
                     break;
+
                 case NodeType.MemberAccess:
                     sqlInfo = VisitMemberExpression(funcExp as MemberExpression);
                     break;
+
                 case NodeType.UnaryOperator:
                     sqlInfo = VisitUnaryExpression(funcExp as UnaryExpression);
                     break;
+
+                case NodeType.NewArrayInit:
+                    sqlInfo = VisitNewArrayExpression(funcExp as NewArrayExpression);
+                    break;
+
                 default:
                     throw new NotSupportedException($"不支持：{notyType.ToString()}");
             }
@@ -130,7 +181,6 @@ namespace JQ.LambdaResolve
 
         private NodeType GetNodeType(Expression funcExp)
         {
-
             switch (funcExp.NodeType)
             {
                 case ExpressionType.AndAlso:
@@ -142,15 +192,23 @@ namespace JQ.LambdaResolve
                 case ExpressionType.LessThan:
                 case ExpressionType.NotEqual:
                     return NodeType.BinaryOperator;
+
                 case ExpressionType.Constant:
                     return NodeType.Constant;
+
                 case ExpressionType.MemberAccess:
                     return NodeType.MemberAccess;
+
                 case ExpressionType.Call:
                     return NodeType.Call;
+
                 case ExpressionType.Not:
                 case ExpressionType.Convert:
                     return NodeType.UnaryOperator;
+
+                case ExpressionType.NewArrayInit:
+                    return NodeType.NewArrayInit;
+
                 default:
                     return NodeType.Unknown;
             }
