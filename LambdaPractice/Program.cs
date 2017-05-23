@@ -22,17 +22,24 @@ namespace LambdaPractice
         static void Main(string[] args)
         {
 
-            //var expression1 = ToExpression4(5);
-            int[] ages = new int[] { 1, 2, 5, 67 };
-            //Expression<Func<User, bool>> expression2 = m => (m.Age == 10 && m.Address.StartsWith("浙江")) || (m.Sex == 0 && m.Age >= ages[1] || "" == m.Address);
-            Expression<Func<User, bool>> expression2 = m => m.Age >= ages[1];
+            //TODO   ExpressionType.ArrayIndex
 
-            ResolveExpression(expression2.Body);
-            Debug(builder.ToString());
-            foreach (var item in dbParameterList)
-            {
-                Debug($"{item.ParameterName},{item.Value},{item.SqlDbType},{item.Size}");
-            }
+            var aaa = new object[] { 11111,111};
+            Console.WriteLine(aaa.GetType().IsArray);
+            IEnumerable<Program> list = new List<Program>();
+            Console.WriteLine(list.GetType().IsGenericType);
+            int? aaaas = 11;
+            Console.WriteLine(aaaas.GetType().IsGenericType);
+            int[] ages = new int[] { 1, 2, 5, 67 };
+            //Expression<Func<User, bool>> expression2 = m => (m.Age == 10 && m.Address.StartsWith("浙江") && m.Address.Contains("省") && m.Address.EndsWith("省")) || (m.Sex == 0 || "" == m.Address);
+            Expression<Func<User, bool>> expression2 = m => ages.Contains(m.Age);
+            //Expression<Func<User, bool>> expression2 = m => m.Address.Contains("11");
+
+            //Expression<Func<User, bool>> expression2 = m => m.Age == 10;
+            Expression2SqlVisitor sqlVisitor = new Expression2SqlVisitor();
+            var sqlMember = sqlVisitor.Resolve(expression2.Body);
+            sqlMember.Output();
+
             Console.Read();
         }
 
@@ -146,7 +153,6 @@ namespace LambdaPractice
                 builder.Append("(");
                 var expressionLeft = expression.Left;
                 ResolveExpression(expressionLeft);
-                //Console.WriteLine(expression.NodeType);
                 ResolveExpressionType(expression.NodeType);
                 var expressionRight = expression.Right;
                 ResolveExpression(expressionRight);

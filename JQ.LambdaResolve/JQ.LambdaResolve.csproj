@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\LambdaPractice\packages\NLog.4.4.9\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,10 +44,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Expression2SqlVisitor.cs" />
     <Compile Include="ExpressionExtension.cs" />
+    <Compile Include="ExpressionVisitor.cs" />
     <Compile Include="LambdaResolve.cs" />
+    <Compile Include="LogUtil.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegexExtension.cs" />
+    <Compile Include="SqlMember.cs" />
+    <Compile Include="SqlMemberType.cs" />
+    <Compile Include="TypeExtension.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
