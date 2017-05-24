@@ -125,8 +125,25 @@ namespace JQ.LambdaResolve
                 return Resolve(Expression.Constant(memberValue));
             }
             var expressionLeft = exp.Left;
-            var leftSqlMember = Resolve(expressionLeft);
             var expressionRight = exp.Right;
+            if (exp.NodeType == ExpressionType.Coalesce)
+            {
+                bool leftIsConstatnt = IsConstantExpression(expressionLeft);
+                bool rightIsConstatnt = IsConstantExpression(expressionRight);
+                if (leftIsConstatnt && rightIsConstatnt)//如果都是常量则直接返回
+                {
+                    var memberValue = Expression.Lambda(exp).Compile().DynamicInvoke();
+                    return Resolve(Expression.Constant(memberValue));
+                }
+                else
+                {
+                    var leftMember = Resolve(expressionLeft);
+                    var rightMember = Resolve(expressionRight);
+                    return AppendSqlMember(leftMember, exp.NodeType, rightMember);
+                }
+            }
+
+            var leftSqlMember = Resolve(expressionLeft);
             var rightSqlMember = Resolve(expressionRight);
             return AppendSqlMember(leftSqlMember, exp.NodeType, rightSqlMember);
         }
@@ -236,13 +253,11 @@ namespace JQ.LambdaResolve
 
                     case "Trim":
                         return ResolveMethodTrim(exp);
-                    case "Count":
-                        return ResolveMethodCount(exp);
+
                     default:
-                        return ResolveMethodUnknow(exp);
+                        throw new NotSupportedException(methodName);
                 }
             }
-
         }
 
         private SqlMember ResolveMethodStartsWith(MethodCallExpression exp)
@@ -478,8 +493,36 @@ namespace JQ.LambdaResolve
             return flage;
         }
 
+        private bool IsConstantExpression(Expression exp)
+        {
+            if (exp.NodeType == ExpressionType.Constant)
+            {
+                return true;
+            }
+            bool flage = false;
+            var checkExp = exp as MemberExpression;
+            while (checkExp != null)
+            {
+                if (checkExp.Expression == null)
+                {
+                    if (checkExp.NodeType == ExpressionType.Constant)
+                    {
+                        flage = true;
+                    }
+                    checkExp = checkExp.Expression as MemberExpression;
+                }
+                else
+                {
+                    flage = checkExp.Expression.NodeType == ExpressionType.Constant;
+                    checkExp = checkExp.Expression as MemberExpression;
+                }
+            }
+            return flage;
+        }
+
         private SqlMember AppendSqlMember(SqlMember leftSqlMember, ExpressionType expType, SqlMember rightSqlMember)
         {
+            SqlMemberType memberType = SqlMemberType.None;
             StringBuilder builder = new StringBuilder();
             List<SqlParameter> paramList = new List<SqlParameter>();
             if (leftSqlMember.ParamList != null)
@@ -491,19 +534,27 @@ namespace JQ.LambdaResolve
                 paramList.AddRange(rightSqlMember.ParamList);
             }
 
-            if (leftSqlMember.MemberType == rightSqlMember.MemberType && leftSqlMember.MemberType == SqlMemberType.None)
+            if (expType == ExpressionType.Coalesce)
             {
-                builder.AppendFormat("({0} {1} {2})", leftSqlMember.Value, ResolveExpressionType(expType), rightSqlMember.Value);
-            }
-            else if (leftSqlMember.MemberType == SqlMemberType.None || rightSqlMember.MemberType == SqlMemberType.None)
-            {
-                builder.AppendFormat("({0} {1} {2}) ", leftSqlMember.MemberType == SqlMemberType.None ? leftSqlMember.Value : leftSqlMember.Value + "=1", ResolveExpressionType(expType), rightSqlMember.MemberType == SqlMemberType.None ? rightSqlMember.Value : rightSqlMember.Value + "=1");
+                builder.AppendFormat("ISNULL({0},{1})", leftSqlMember.MemberType == SqlMemberType.Value ? rightSqlMember.Value : leftSqlMember.Value, leftSqlMember.MemberType == SqlMemberType.Value ? leftSqlMember.Value : rightSqlMember.Value);
+                memberType = SqlMemberType.Key;
             }
             else
             {
-                builder.AppendFormat("({0} {1} {2})", leftSqlMember.Value, ResolveExpressionType(expType), rightSqlMember.Value);
+                if (leftSqlMember.MemberType == rightSqlMember.MemberType && leftSqlMember.MemberType == SqlMemberType.None)
+                {
+                    builder.AppendFormat("({0} {1} {2})", leftSqlMember.Value, ResolveExpressionType(expType), rightSqlMember.Value);
+                }
+                else if (leftSqlMember.MemberType == SqlMemberType.None || rightSqlMember.MemberType == SqlMemberType.None)
+                {
+                    builder.AppendFormat("({0} {1} {2}) ", leftSqlMember.MemberType == SqlMemberType.None ? leftSqlMember.Value : leftSqlMember.Value + "=1", ResolveExpressionType(expType), rightSqlMember.MemberType == SqlMemberType.None ? rightSqlMember.Value : rightSqlMember.Value + "=1");
+                }
+                else
+                {
+                    builder.AppendFormat("({0} {1} {2})", leftSqlMember.Value, ResolveExpressionType(expType), rightSqlMember.Value);
+                }
             }
-            return new SqlMember(builder.ToString(), SqlMemberType.None, paramList);
+            return new SqlMember(builder.ToString(), memberType, paramList);
         }
 
         private SqlParameter GetSqlParameter(object value, Type type)
