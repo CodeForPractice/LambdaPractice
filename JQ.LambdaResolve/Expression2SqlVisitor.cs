@@ -42,7 +42,8 @@ namespace JQ.LambdaResolve
                 case ExpressionType.ArrayLength:
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
-                    throw new NotSupportedException(exp.NodeType.ToString());
+                    sqlMember = this.VisitUnary((UnaryExpression)exp);
+                    break;
 
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
@@ -74,7 +75,8 @@ namespace JQ.LambdaResolve
                     throw new NotSupportedException(exp.NodeType.ToString());
 
                 case ExpressionType.Conditional:
-                    throw new NotSupportedException(exp.NodeType.ToString());
+                    sqlMember = this.VisitConditional((ConditionalExpression)exp);
+                    break;
 
                 case ExpressionType.Constant:
                     sqlMember = this.VisitConstant((ConstantExpression)exp);
@@ -84,7 +86,6 @@ namespace JQ.LambdaResolve
                     throw new NotSupportedException(exp.NodeType.ToString());
 
                 case ExpressionType.MemberAccess:
-                    //return this.VisitMemberAccess((MemberExpression)exp);
                     sqlMember = VisitMemberAccess((MemberExpression)exp);
                     break;
 
@@ -117,6 +118,12 @@ namespace JQ.LambdaResolve
             return sqlMember;
         }
 
+        private SqlMember VisitUnary(UnaryExpression exp)
+        {
+            var memberValue = Expression.Lambda(exp).Compile().DynamicInvoke();
+            return Resolve(Expression.Constant(memberValue));
+        }
+
         private SqlMember VisitBinary(BinaryExpression exp)
         {
             if (exp.NodeType == ExpressionType.ArrayIndex)
@@ -146,6 +153,50 @@ namespace JQ.LambdaResolve
             var leftSqlMember = Resolve(expressionLeft);
             var rightSqlMember = Resolve(expressionRight);
             return AppendSqlMember(leftSqlMember, exp.NodeType, rightSqlMember);
+        }
+
+        private SqlMember VisitConditional(ConditionalExpression exp)
+        {
+            try
+            {
+                var value = Expression.Lambda(exp.Test).Compile().DynamicInvoke();
+                if (value != null && (bool)value == true)
+                {
+                    return Resolve(exp.IfTrue);
+                }
+                return Resolve(exp.IfFalse);
+            }
+            catch
+            {
+                StringBuilder builder = new StringBuilder();
+                List<SqlParameter> paramList = new List<SqlParameter>();
+                var conditionSqlMember = Resolve(exp.Test);
+                var ifTrueSqlMember = Resolve(exp.IfTrue);
+                var ifFalseSqlMember = Resolve(exp.IfFalse);
+                builder.Append("(CASE WHEN ");
+                if (conditionSqlMember.MemberType == SqlMemberType.None)
+                {
+                    builder.Append(conditionSqlMember.Value);
+                }
+                else
+                {
+                    builder.AppendFormat("{0}=1", conditionSqlMember.Value);
+                }
+                builder.AppendFormat(" THEN {0} ELSE {1})", ifTrueSqlMember.Value, ifFalseSqlMember.Value);
+                if (conditionSqlMember.ParamList != null)
+                {
+                    paramList.AddRange(conditionSqlMember.ParamList);
+                }
+                if (ifTrueSqlMember.ParamList != null)
+                {
+                    paramList.AddRange(ifTrueSqlMember.ParamList);
+                }
+                if (ifFalseSqlMember.ParamList != null)
+                {
+                    paramList.AddRange(ifFalseSqlMember.ParamList);
+                }
+                return new SqlMember(builder.ToString(), SqlMemberType.None, paramList);
+            }
         }
 
         private SqlMember VisitMemberAccess(MemberExpression exp)

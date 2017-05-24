@@ -34,7 +34,7 @@ namespace LambdaPractice
             int[] ages = new int[] { 1, 2, 5, 67 };
             //Expression<Func<User, bool>> expression2 = m => (m.Age == 10 && m.Address.StartsWith("浙江") && m.Address.Contains("省") && m.Address.EndsWith("省")) || (m.Sex == 0 || "" == m.Address && ages.Contains(m.Age) && m.Age == ages[3]);
             //Expression<Func<User, bool>> expression2 = m => m.Address.TrimStart() == "11" && m.Name.TrimEnd() == "3434" && m.Age == 1 && m.IsDelete == true;
-            Expression<Func<User, bool>> expression2 = m => (m.CreateTime ?? DateTime.Now) > DateTime.Now.AddDays(-1) && (m.CreateTime ?? DateTime.Now) < DateTime.Now.AddDays(1);
+            Expression<Func<User, bool>> expression2 = m => GetAge() ? m.Address == "" : m.Age == 1;
 
             //Expression<Func<User, bool>> expression2 = m => m.Age == 10;
             Expression2SqlVisitor sqlVisitor = new Expression2SqlVisitor();
@@ -44,9 +44,9 @@ namespace LambdaPractice
             Console.Read();
         }
 
-        static int GetAge()
+        static bool GetAge()
         {
-            return 1;
+            return false;
         }
 
         static void ResolveExpression(Expression expression)
