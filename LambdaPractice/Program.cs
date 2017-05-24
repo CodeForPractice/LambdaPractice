@@ -18,22 +18,23 @@ namespace LambdaPractice
         static StringBuilder builder = new StringBuilder();
         static int currentParameterIndex = 0;
         static List<SqlParameter> dbParameterList = new List<SqlParameter>();
+        static string address = "11";
 
         static void Main(string[] args)
         {
 
             //TODO   ExpressionType.ArrayIndex
 
-            var aaa = new object[] { 11111,111};
+            var aaa = new object[] { 11111, 111 };
             Console.WriteLine(aaa.GetType().IsArray);
             IEnumerable<Program> list = new List<Program>();
             Console.WriteLine(list.GetType().IsGenericType);
             int? aaaas = 11;
-            Console.WriteLine(aaaas.GetType().IsGenericType);
+            Console.WriteLine(aaaas.GetType().IsValueType);
             int[] ages = new int[] { 1, 2, 5, 67 };
-            //Expression<Func<User, bool>> expression2 = m => (m.Age == 10 && m.Address.StartsWith("浙江") && m.Address.Contains("省") && m.Address.EndsWith("省")) || (m.Sex == 0 || "" == m.Address);
-            Expression<Func<User, bool>> expression2 = m => ages.Contains(m.Age);
-            //Expression<Func<User, bool>> expression2 = m => m.Address.Contains("11");
+            //Expression<Func<User, bool>> expression2 = m => (m.Age == 10 && m.Address.StartsWith("浙江") && m.Address.Contains("省") && m.Address.EndsWith("省")) || (m.Sex == 0 || "" == m.Address && ages.Contains(m.Age) && m.Age == ages[3]);
+            //Expression<Func<User, bool>> expression2 = m => m.Address.TrimStart() == "11" && m.Name.TrimEnd() == "3434" && m.Age == 1 && m.IsDelete == true;
+            Expression<Func<User, bool>> expression2 = m => Program.address.StartsWith("1") & m.Age == 1;
 
             //Expression<Func<User, bool>> expression2 = m => m.Age == 10;
             Expression2SqlVisitor sqlVisitor = new Expression2SqlVisitor();
@@ -41,6 +42,11 @@ namespace LambdaPractice
             sqlMember.Output();
 
             Console.Read();
+        }
+
+        static int GetAge()
+        {
+            return 1;
         }
 
         static void ResolveExpression(Expression expression)
@@ -429,5 +435,7 @@ namespace LambdaPractice
         public int Age { get; set; }
 
         public int Sex { get; set; }
+
+        public bool IsDelete { get; set; }
     }
 }
