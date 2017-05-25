@@ -67,6 +67,10 @@
       <Project>{db704aa7-4dc5-436f-9e2e-b0018e922ef8}</Project>
       <Name>JQ.LambdaResolve</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JQ\JQ.csproj">
+      <Project>{7e00b890-5eae-48db-953f-5a3f2b4ba211}</Project>
+      <Name>JQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
