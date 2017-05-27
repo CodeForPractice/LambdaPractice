@@ -3,3 +3,5 @@ E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\bin\Debug\JQ.pdb
 E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\obj\Debug\JQ.dll
 E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\obj\Debug\JQ.pdb
 E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\obj\Debug\JQ.csprojResolveAssemblyReference.cache
+E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\bin\Debug\JQ.dll.config
+E:\Project\SelfCode\CodeForPractice\LambdaPractice\JQ\bin\Debug\Oracle.ManagedDataAccess.dll
