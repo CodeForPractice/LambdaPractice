@@ -1,4 +1,4 @@
-﻿namespace JQ.Expression
+﻿namespace JQ.ExpressionResolve
 {
     /// <summary>
     /// Copyright (C) 2017 yjq 版权所有。

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JQ.Expression
+﻿namespace JQ.ExpressionResolve
 {
     /// <summary>
     /// Copyright (C) 2017 yjq 版权所有。
@@ -15,6 +9,13 @@ namespace JQ.Expression
     /// </summary>
     public sealed class DataMember
     {
+        public DataMember(string name, object value, DataMemberType memberType)
+        {
+            Name = name;
+            Value = value;
+            MemberType = memberType;
+        }
+
         public string Name { get; set; }
 
         public object Value { get; set; }

@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\LambdaPractice\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,10 +44,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Expression\DataMember.cs" />
-    <Compile Include="Expression\DataMemberType.cs" />
-    <Compile Include="Expression\ExpressionVisitor.cs" />
+    <Compile Include="ExpressionResolve\BaseParamExpressionVisitor.cs" />
+    <Compile Include="ExpressionResolve\DataMember.cs" />
+    <Compile Include="ExpressionResolve\DataMemberUtil.cs" />
+    <Compile Include="ExpressionResolve\DataMemberType.cs" />
+    <Compile Include="ExpressionResolve\ExpressionExtension.cs" />
+    <Compile Include="ExpressionResolve\ExpressionVisitor.cs" />
+    <Compile Include="ExpressionResolve\SqlServerVisitor.cs" />
+    <Compile Include="ExpressionResolve\SqlSeverExpressionVisitor.cs" />
+    <Compile Include="ExpressionResolve\TypeUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
