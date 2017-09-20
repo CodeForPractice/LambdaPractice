@@ -280,6 +280,11 @@ namespace JQ.ExpressionResolve
 
         protected override DataMember VisitUnary(UnaryExpression exp)
         {
+            var operandExp = exp.Operand;
+            if (operandExp.NodeType == ExpressionType.MemberAccess)
+            {
+                return Resolve(operandExp);
+            }
             var memberValue = Expression.Lambda(exp).Compile().DynamicInvoke();
             return Resolve(Expression.Constant(memberValue));
         }
